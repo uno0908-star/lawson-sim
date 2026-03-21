@@ -51,8 +51,10 @@
   tfoot td{color:#fff!important;font-weight:700!important;border-color:rgba(255,255,255,.15)!important;background:transparent!important;}
   tfoot td.sn{color:#93b8e0!important;letter-spacing:.04em;}
   .tip-wrap{position:relative;display:inline-block;cursor:pointer;}
-  .tip-wrap .tip{display:none;position:absolute;right:0;top:120%;background:#1a2a3a;color:#fff;font-size:10px;border-radius:8px;padding:10px 13px;z-index:300;min-width:250px;box-shadow:0 4px 20px rgba(0,0,0,.4);font-family:'Noto Sans JP',sans-serif;line-height:2.0;white-space:normal;}
+  .tip-wrap .tip{display:none;position:fixed;right:10px;top:50%;transform:translateY(-50%);background:#1a2a3a;color:#fff;font-size:12px;border-radius:10px;padding:14px 16px;z-index:9999;min-width:260px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.5);font-family:'Noto Sans JP',sans-serif;line-height:2.2;white-space:normal;}
+  @media(min-width:900px){.tip-wrap .tip{position:absolute;right:0;top:120%;transform:none;fixed:unset;min-width:250px;max-width:320px;}}
   .tip-wrap:hover .tip{display:block;}
+  .tip-wrap.active .tip{display:block;}
   .tip-u{text-decoration:underline dotted;}
   .legend{display:flex;gap:14px;align-items:center;padding:7px 20px 2px;font-size:10px;color:var(--muted);flex-wrap:wrap;}
   .ld{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:3px;}
@@ -333,7 +335,7 @@ function buildTable() {
     const tot = dd.aico+dd.ff+dd.kitchen+dd.op+dd.dry;
     const hTip = `<div class="tip-wrap">
       <span class="tip-u" style="color:${c.henkaGenka<=c.henkaYosanSoFar?'var(--green)':'var(--red)'}">${fmt(c.henkaGenka)}</span>
-      <div class="tip">
+      <div class="tip"><span onclick="this.closest('.tip-wrap').classList.remove('active')" style="float:right;cursor:pointer;font-size:14px;margin-left:10px;color:#93b8e0">✕</span>
         <b>【1日あたり売変合計（売価）】</b><br>
         合　計：${fy(tot)}<br>
         ─────────────────<br>
@@ -345,7 +347,7 @@ function buildTable() {
     // 本部支援ツールチップ（1日あたり付き）
     const sTip = `<div class="tip-wrap">
       <span class="tip-u" style="color:var(--purple)">${fmt(c.supGenka)}</span>
-      <div class="tip">
+      <div class="tip"><span onclick="this.closest('.tip-wrap').classList.remove('active')" style="float:right;cursor:pointer;font-size:14px;margin-left:10px;color:#93b8e0">✕</span>
         <b>【週別支援（売価）2/17〜3/16】</b><br>
         ${supLines}<br>
         支援累計（売価）：${fmt(c.supBaika)}千円<br>
@@ -361,7 +363,7 @@ function buildTable() {
     // 予算内訳ツールチップ
     const bTip = `<div class="tip-wrap">
       <span class="tip-u" style="color:var(--blue)">内訳</span>
-      <div class="tip">
+      <div class="tip"><span onclick="this.closest('.tip-wrap').classList.remove('active')" style="float:right;cursor:pointer;font-size:14px;margin-left:10px;color:#93b8e0">✕</span>
         FC収入予算：${fmt(s.FC収入予算)}千円<br>
         雑益予算：${fmt(s.雑益予算)}千円<br>
         ────────────────<br>
@@ -512,6 +514,25 @@ function buildSummary() {
 }
 
 function recalc() { buildTable(); }
+
+// ===== スマホ対応：タップでポップアップ表示 =====
+document.addEventListener('click', function(e) {
+  const wrap = e.target.closest('.tip-wrap');
+  if (wrap) {
+    // 他の開いているポップアップを閉じる
+    document.querySelectorAll('.tip-wrap.active').forEach(el => {
+      if (el !== wrap) el.classList.remove('active');
+    });
+    wrap.classList.toggle('active');
+    e.stopPropagation();
+  } else {
+    // 外をタップしたら全部閉じる
+    document.querySelectorAll('.tip-wrap.active').forEach(el => {
+      el.classList.remove('active');
+    });
+  }
+});
+
 buildTable();
 </script>
 </body>
